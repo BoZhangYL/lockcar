@@ -38,11 +38,11 @@ public class AN_Lock {
 		map.put("消息 ID", id);
 		map.put("消息体属性", R8F40.substring(i, i = +i + R8f40[2]));
 		map.put("终端手机号", R8F40.substring(i, i = +i + R8f40[3]));
-		map.put("消息流水号", R8F40.substring(i,i=+i+R8f40[4]));
+		map.put("消息流水号", R8F40.substring(i, i = +i + R8f40[4]));
 
-		map.put("校验码", R8F40.substring(R8F40.length() - 1 - 2 - 2, R8F40.length() - 1 - 2));
-		map.put("标识位", R8F40.substring(R8F40.length() - 1 - 2, R8F40.length() - 1));
-		String body = R8F40.substring(i, R8F40.length() - 1 - 2 - 2);
+		map.put("校验码", R8F40.substring(R8F40.length() - 2 - 2, R8F40.length() - 2));
+		String body = R8F40.substring(i, R8F40.length() - 4);
+		//System.out.println(body);
 		if (id.equals("8F40")) {
 			int j = 0;
 			map.put("锁车协议类", body.substring(j, j += 1));
@@ -66,25 +66,23 @@ public class AN_Lock {
 					map.put("锁车参数", body.substring(j, j += 4));
 				}
 			}
-		}else if(id.equals("0F40")) {
-			int j=0;
+		} else if (id.equals("0F40")) {
+			int j = 0;
 			map.put("应答流水号 ", body.substring(j, j += 4));
 			map.put("执行结果 ", body.substring(j, j += 2));
-			String lock_type =body.substring(j, j += 2);
-			if(lock_type.equals("01")) {
+			String lock_type = body.substring(j, j += 2);
+			if (lock_type.equals("01")) {
 				lock_type = "1. 青气 MD5";
-			}else if(lock_type.equals("02")) {
+			} else if (lock_type.equals("02")) {
 				lock_type = "2.青气 TSC1 锁车";
-			} 
-			else if(lock_type.equals("03")) {
+			} else if (lock_type.equals("03")) {
 				lock_type = "3.MD5 锁车 1";
-			} 
-			else if(lock_type.equals("04")) {
+			} else if (lock_type.equals("04")) {
 				lock_type = "4.MD5 锁车 2";
-			} 
+			}
 			map.put("锁车协议类型 ", lock_type);
 			map.put("响应命令 ", body.substring(j, j += 2));
-		}else {
+		} else {
 			System.out.printf("不支持协议类型");
 		}
 		return map;
