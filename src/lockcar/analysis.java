@@ -50,6 +50,12 @@ public class analysis {
 		int[] R8f40 = { 2, 4, 4, 12, 4, 2, 2 };
 		Map<String, String> map = new HashMap<>();
 		int i = 0;
+		//System.out.println(R8F40);
+		
+		R8F40 = R8F40.replaceAll("7D02", "7E");
+		//System.out.println(R8F40);
+		R8F40 = R8F40.replaceAll("7D01", "7D");
+		//System.out.println(R8F40);
 		map.put("标识位", R8F40.substring(i, i = +i + R8f40[0]));
 		String id = R8F40.substring(i, i = +i + R8f40[1]);
 		map.put("消息 ID", id);
@@ -64,7 +70,7 @@ public class analysis {
 			int j = 0;
 			String lock_type = body.substring(j, j += 2);
 
-			map.put("锁车协议类型", lockTypes(lock_type));
+			map.put("锁车协议类型", lockTypes(lock_type) + ", " + lock_type);
 			String subcommand = body.substring(j, j += 2);
 			if (subcommand.equals("01") || subcommand.equals("02")) {
 				map.put("子命令", subCommands(subcommand));
@@ -91,9 +97,9 @@ public class analysis {
 			int j = 0;
 			map.put("应答流水号 ", body.substring(j, j += 4));
 			String execResult = body.substring(j, j += 2);
-			map.put("执行结果 ", execResults(execResult));
+			map.put("执行结果 ", execResults(execResult) + ", " + execResult);
 			String lock_type = body.substring(j, j += 2);
-			map.put("锁车协议类型 ", lockTypes(lock_type));
+			map.put("锁车协议类型 ", lockTypes(lock_type) + ", " + lock_type);
 			String responsecommand = body.substring(j, j += 2);
 			map.put("响应命令 ", responseCommands(responsecommand));
 		} else {
@@ -424,44 +430,28 @@ public class analysis {
 
 		JLabel lblNewLabel_1 = new JLabel("协议内容解析如下：");
 		GroupLayout gl_panel_1 = new GroupLayout(panel_1);
-		gl_panel_1.setHorizontalGroup(
-			gl_panel_1.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_panel_1.createSequentialGroup()
-					.addGroup(gl_panel_1.createParallelGroup(Alignment.LEADING)
-						.addGroup(gl_panel_1.createSequentialGroup()
-							.addGap(24)
-							.addGroup(gl_panel_1.createParallelGroup(Alignment.LEADING)
+		gl_panel_1.setHorizontalGroup(gl_panel_1.createParallelGroup(Alignment.LEADING).addGroup(gl_panel_1
+				.createSequentialGroup()
+				.addGroup(gl_panel_1.createParallelGroup(Alignment.LEADING).addGroup(gl_panel_1.createSequentialGroup()
+						.addGap(24)
+						.addGroup(gl_panel_1.createParallelGroup(Alignment.LEADING)
 								.addComponent(OutArea, GroupLayout.PREFERRED_SIZE, 675, GroupLayout.PREFERRED_SIZE)
 								.addGroup(gl_panel_1.createSequentialGroup()
-									.addComponent(InArea, GroupLayout.PREFERRED_SIZE, 578, GroupLayout.PREFERRED_SIZE)
-									.addGap(18)
-									.addComponent(btnNewButton, GroupLayout.PREFERRED_SIZE, 66, GroupLayout.PREFERRED_SIZE))))
-						.addGroup(gl_panel_1.createSequentialGroup()
-							.addContainerGap()
-							.addComponent(lblNewLabel))
-						.addGroup(gl_panel_1.createSequentialGroup()
-							.addContainerGap()
-							.addComponent(lblNewLabel_1)))
-					.addContainerGap(50, Short.MAX_VALUE))
-		);
-		gl_panel_1.setVerticalGroup(
-			gl_panel_1.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_panel_1.createSequentialGroup()
-					.addGroup(gl_panel_1.createParallelGroup(Alignment.LEADING)
-						.addGroup(gl_panel_1.createSequentialGroup()
-							.addContainerGap()
-							.addComponent(lblNewLabel)
-							.addPreferredGap(ComponentPlacement.RELATED)
-							.addComponent(InArea, GroupLayout.PREFERRED_SIZE, 133, GroupLayout.PREFERRED_SIZE))
-						.addGroup(gl_panel_1.createSequentialGroup()
-							.addGap(66)
-							.addComponent(btnNewButton)))
-					.addGap(25)
-					.addComponent(lblNewLabel_1)
-					.addGap(18)
-					.addComponent(OutArea, GroupLayout.DEFAULT_SIZE, 271, Short.MAX_VALUE)
-					.addContainerGap())
-		);
+										.addComponent(InArea, GroupLayout.PREFERRED_SIZE, 578,
+												GroupLayout.PREFERRED_SIZE)
+										.addGap(18).addComponent(btnNewButton, GroupLayout.PREFERRED_SIZE, 66,
+												GroupLayout.PREFERRED_SIZE))))
+						.addGroup(gl_panel_1.createSequentialGroup().addContainerGap().addComponent(lblNewLabel))
+						.addGroup(gl_panel_1.createSequentialGroup().addContainerGap().addComponent(lblNewLabel_1)))
+				.addContainerGap(50, Short.MAX_VALUE)));
+		gl_panel_1.setVerticalGroup(gl_panel_1.createParallelGroup(Alignment.LEADING)
+				.addGroup(gl_panel_1.createSequentialGroup().addGroup(gl_panel_1.createParallelGroup(Alignment.LEADING)
+						.addGroup(gl_panel_1.createSequentialGroup().addContainerGap().addComponent(lblNewLabel)
+								.addPreferredGap(ComponentPlacement.RELATED)
+								.addComponent(InArea, GroupLayout.PREFERRED_SIZE, 133, GroupLayout.PREFERRED_SIZE))
+						.addGroup(gl_panel_1.createSequentialGroup().addGap(66).addComponent(btnNewButton))).addGap(25)
+						.addComponent(lblNewLabel_1).addGap(18)
+						.addComponent(OutArea, GroupLayout.DEFAULT_SIZE, 271, Short.MAX_VALUE).addContainerGap()));
 		panel_1.setLayout(gl_panel_1);
 	}
 }
