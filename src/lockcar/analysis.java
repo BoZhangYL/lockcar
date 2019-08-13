@@ -46,25 +46,25 @@ public class analysis {
 		});
 	}
 
-	public static Map<String, String> analyshead(String R8F40) {
+	public static Map<String, String> analyshead(String RMESSAGE) {
 		int[] R8f40 = { 2, 4, 4, 12, 4, 2, 2 };
 		Map<String, String> map = new HashMap<>();
 		int i = 0;
-		//System.out.println(R8F40);
-		
-		R8F40 = R8F40.replaceAll("7D02", "7E");
-		//System.out.println(R8F40);
-		R8F40 = R8F40.replaceAll("7D01", "7D");
-		//System.out.println(R8F40);
-		map.put("标识位", R8F40.substring(i, i = +i + R8f40[0]));
-		String id = R8F40.substring(i, i = +i + R8f40[1]);
-		map.put("消息 ID", id);
-		map.put("消息体属性", R8F40.substring(i, i = +i + R8f40[2]));
-		map.put("终端手机号", R8F40.substring(i, i = +i + R8f40[3]));
-		map.put("消息流水号", R8F40.substring(i, i = +i + R8f40[4]));
+		// System.out.println(R8F40);
 
-		map.put("校验码", R8F40.substring(R8F40.length() - 2 - 2, R8F40.length() - 2));
-		String body = R8F40.substring(i, R8F40.length() - 4);
+		RMESSAGE = RMESSAGE.replaceAll("7D02", "7E");
+		// System.out.println(R8F40);
+		RMESSAGE = RMESSAGE.replaceAll("7D01", "7D");
+		// System.out.println(R8F40);
+		map.put("标识位", RMESSAGE.substring(i, i = +i + R8f40[0]));
+		String id = RMESSAGE.substring(i, i = +i + R8f40[1]);
+		map.put("消息 ID", id);
+		map.put("消息体属性", RMESSAGE.substring(i, i = +i + R8f40[2]));
+		map.put("终端手机号", RMESSAGE.substring(i, i = +i + R8f40[3]));
+		map.put("消息流水号", RMESSAGE.substring(i, i = +i + R8f40[4]));
+
+		map.put("校验码", RMESSAGE.substring(RMESSAGE.length() - 2 - 2, RMESSAGE.length() - 2));
+		String body = RMESSAGE.substring(i, RMESSAGE.length() - 4);
 		// System.out.println(body);
 		if (id.equals("8F40")) {
 			int j = 0;
@@ -102,14 +102,381 @@ public class analysis {
 			map.put("锁车协议类型 ", lockTypes(lock_type) + ", " + lock_type);
 			String responsecommand = body.substring(j, j += 2);
 			map.put("响应命令 ", responseCommands(responsecommand));
+		} else if (id.equals("8F51")) {
+			int j = 0;
+			map.put("Version ", body.substring(j, j += 2));
+			map.put("请求时间", body.substring(j, j += 12));
+			String funs = body.substring(j, j += 2);
+			map.put("功能个数", funs);
+			for (int k = 0; k < Integer.valueOf(funs); k++) {
+				String fun_no = body.substring(j, j += 2);
+				map.put("功能编号" + k + 1, getCarStausFuncationList(fun_no));
+			}
+
+		} else if (id.equals("0F51")) {
+			int j = 0;
+			map.put("Version ", body.substring(j, j += 2));
+			map.put("应答时间", body.substring(j, j += 12));
+			String PackageTag = body.substring(j, j += 2);
+			map.put("包标志 ", getPackageTag(PackageTag));
+			map.put("应答流水号 ", body.substring(j, j += 4));
+			String funs = body.substring(j, j += 2);
+			map.put("功能个数", funs);
+			for (int k = 0; k < Integer.valueOf(funs); k++) {
+				String fun_no = body.substring(j, j += 2);
+				map.put("功能编号" + k + 1, getCarStausFuncationList(fun_no));
+				String fun_length = body.substring(j, j += 2);
+				map.put("功能编号" + k + 1 + "结果长度", fun_length);
+				String fun_content = body.substring(j, j += 2 * Integer.valueOf(fun_length));
+				map.put("功能内容：", getFunConttent(fun_no, fun_content));
+			}
+		} else if (id.equals("8F41")) {
+			int j = 0;
+			map.put("Version ", body.substring(j, j += 2));
+			map.put("请求时间", body.substring(j, j += 12));
+			String funs = body.substring(j, j += 2);
+			map.put("功能个数", funs);
+			for (int k = 0; k < Integer.valueOf(funs); k++) {
+				String fun_no = body.substring(j, j += 2);
+				map.put("功能编号" + k + 1, getcontrolFun(fun_no));
+				String FunCmd = body.substring(j, j += 2);
+				map.put("功能指令 ", getcontrolcmd(fun_no, FunCmd));
+				String FunItems = body.substring(j, j += 2);
+				map.put("功能参数 ", getFunItems(fun_no, FunItems));
+			}
+		} else if (id.equals("0F41")) {
+			int j = 0;
+			map.put("Version ", body.substring(j, j += 2));
+			map.put("应答时间", body.substring(j, j += 12));
+			map.put("应答流水号 ", body.substring(j, j += 4));
+			String funs = body.substring(j, j += 2);
+			map.put("功能个数", funs);
+			for (int k = 0; k < Integer.valueOf(funs); k++) {
+				String fun_no = body.substring(j, j += 2);
+				map.put("功能编号" + k + 1, getcontrolFun(fun_no));
+				String FunCmd = body.substring(j, j += 2);
+				map.put("功能指令 ", getcontrolcmd(fun_no, FunCmd));
+				String EXCStauts = body.substring(j, j += 2);
+				;
+				map.put("执行状态 ", gettExcStatus(EXCStauts));
+
+			}
 		} else {
-			System.out.printf("不支持协议类型");
+			map.put("不支持通讯协议报文:", id);
 		}
 		return map;
 	}
 
+	public static String gettExcStatus(String rs) {
+		String RS = rs;
+		switch (rs) {
+		case "00":
+			RS = "执行成功";
+			break;
+		case "01":
+			RS = "执行失败";
+			break;
+		case "02":
+			RS = "执行超时";
+			break;
+		}
+		return RS;
+	}
+
+	public static String getFunItems(String fun_no, String rs) {
+		String RS = rs;
+		switch (fun_no) {
+		case "04":
+			RS = "请求设置百分比" + rs;
+			break;
+		case "23":
+			RS = "设置温度" + rs;
+			break;
+		}
+		return RS;
+	}
+
+	public static String getcontrolcmd(String fun_no, String rs) {
+		String RS = rs;
+		switch (fun_no) {
+		case "01":
+			switch (rs) {
+			case "00":
+				RS = "主驾驶门解锁";
+				break;
+			case "10":
+				RS = "主驾驶门上锁";
+				break;
+			case "01":
+				RS = "副驾驶门解锁";
+				break;
+			case "11":
+				RS = "副驾驶门上锁";
+				break;
+			case "02":
+				RS = "主后门解锁";
+				break;
+			case "12":
+				RS = "主后门上锁";
+				break;
+			case "03":
+				RS = "副后门解锁";
+				break;
+			case "13":
+				RS = "副后门上锁";
+				break;
+			case "04":
+				RS = "尾门解锁";
+				break;
+			case "14":
+				RS = "尾门上锁";
+				break;
+			case "09":
+				RS = "中控上锁";
+				break;
+			case "19":
+				RS = "中控解锁";
+				break;
+			}
+			break;
+		case "04":
+			switch (rs) {
+			case "01":
+				RS = "主驾驶窗";
+				break;
+			case "02":
+				RS = "副驾驶窗";
+				break;
+			case "03":
+				RS = "主后驾驶窗";
+				break;
+			case "04":
+				RS = "副后驾驶";
+				break;
+			}
+			break;
+		case "23":
+			switch (rs) {
+			case "01":
+				RS = "开启热车";
+				break;
+			case "00":
+				RS = "关闭热车";
+				break;
+
+			}
+			break;
+		}
+		return RS;
+	}
+
+	public static String getcontrolFun(String rs) {
+		String RS = rs;
+		switch (rs) {
+		case "00":
+			RS = "N/A，保留";
+			break;
+		case "01":
+			RS = "车门控制";
+			break;
+		case "03":
+			RS = "双闪控制";
+			break;
+		case "04":
+			RS = "车窗升降控制";
+			break;
+		case "06":
+			RS = "天窗控制";
+			break;
+		case "08":
+			RS = "灯光控制";
+			break;
+		case "0A":
+			RS = "保留";
+			break;
+		case "0C":
+			RS = "保留";
+			break;
+		case "0E":
+			RS = "发动机启动/停止";
+			break;
+		case "10":
+			RS = "车辆电源上电/下电";
+			break;
+		case "12":
+			RS = "WIFI 打开/关闭";
+			break;
+		case "15":
+			RS = "空调打开/关闭";
+			break;
+		case "16":
+			RS = "空调车窗除霜功能打开/关闭";
+			break;
+		case "17":
+			RS = "空调后视镜除霜功能打开/关闭";
+			break;
+		case "18":
+			RS = "空调温度设置";
+			break;
+		case "19":
+			RS = "雨刮控制";
+			break;
+		case "20":
+			RS = "后视镜控制";
+			break;
+		case "23":
+			RS = "开启/关闭水暖热车";
+			break;
+
+		}
+		return RS;
+	}
+
+	public static String getFunConttent(String fun_no, String rs) {
+		String RS = rs;
+		switch (fun_no) {
+		case "01":
+			RS = rs;
+			break;
+		case "05":
+			RS = rs;
+			break;
+		case "23":
+			String CurrentWorkStayus = getcathotstatus(rs.substring(0, 2));
+			String currentTemperture = rs.substring(2, 4);
+			String error_no = rs.substring(4, 6);
+			if (Integer.valueOf(error_no) > 0) {
+				String[] errors = new String[Integer.valueOf(error_no)];
+				for (int i = 0; i < Integer.valueOf(error_no); i++) {
+					errors[i] = rs.substring(6 + i * 4, 8 + i * 4);
+				}
+				RS = RS + "当前工作状态：" + CurrentWorkStayus + "\n" + "当前水温：" + currentTemperture + "\n" + "当前故障：\n";
+				for (int i = 0; i < Integer.valueOf(error_no); i++) {
+					RS = RS + "故障" + i + 1 + ":" + errors[i];
+				}
+			} else {
+				RS = "当前工作状态：" + CurrentWorkStayus + "\n" + "当前水温：" + currentTemperture + "\n" + "当前故障：无故障";
+			}
+
+			break;
+		case "24":
+			RS = getwaketype(rs);
+			break;
+		default:
+			RS = "不支持功能内容";
+
+		}
+		return RS;
+	}
+
+	public static String getwaketype(String rs) {
+		String RS = rs;
+		switch (rs) {
+		case "00":
+			RS = "异常类型";
+			break;
+		case "01":
+			RS = "定时唤醒事件";
+			break;
+		case "02":
+			RS = "Gsensor唤醒事件";
+			break;
+		case "03":
+			RS = "can信号唤醒事件";
+			break;
+		case "04":
+			RS = "短信唤醒事";
+			break;
+
+		}
+		return RS;
+	}
+
+	public static String getcathotstatus(String rs) {
+		String RS = rs;
+		switch (rs) {
+		case "00":
+			RS = "水暖设备空闲";
+			break;
+		case "01":
+			RS = "水暖设备加热中";
+			break;
+		case "02":
+			RS = "水暖设备关闭中";
+			break;
+		case "03":
+			RS = "水暖设备待机中";
+			break;
+		case "10":
+			RS = "车辆不支持热车功";
+			break;
+
+		}
+		return RS;
+	}
+
+	public static String getPackageTag(String rs) {
+		String RS = rs;
+		switch (rs) {
+		case "00":
+			RS = "获取车辆状态应答";
+			break;
+		case "01":
+			RS = "主动时间上报，平台不关心请求流水号";
+			break;
+		}
+		return RS;
+	}
+
+	public static String getCarStausFuncationList(String rs) {
+		String RS = rs;
+		switch (rs) {
+		case "00":
+			RS = "N/A，保留";
+			break;
+		case "01":
+			RS = "获取车门状态";
+			break;
+		case "05":
+			RS = "获取车窗状态";
+			break;
+		case "07":
+			RS = "获取天窗状态";
+			break;
+		case "09":
+			RS = "获取灯光状态";
+			break;
+		case "0B":
+			RS = "获取金融锁车状态";
+			break;
+		case "0D":
+			RS = "获取销贷激活状态";
+			break;
+		case "0F":
+			RS = "获取发动机状态";
+			break;
+		case "11":
+			RS = "获取车辆电源状态";
+			break;
+		case "13":
+			RS = "获取WIFI开关状态";
+			break;
+		case "14":
+			RS = "获取空调状态";
+			break;
+		case "23":
+			RS = "获取/报告当前水暖热车情况";
+			break;
+		case "24":
+			RS = "终端唤醒后报告平台唤醒情况";
+			break;
+
+		}
+		return RS;
+	}
+
 	public static String subCommands(String rs) {
-		String RS = null;
+		String RS = rs;
 		switch (rs) {
 		case "01":
 			rs = "激活";
@@ -132,7 +499,7 @@ public class analysis {
 	}
 
 	public static String lockTypes(String lock_type) {
-		String RS = null;
+		String RS = lock_type;
 		if (lock_type.equals("01")) {
 			lock_type = "1. 青气 MD5";
 		} else if (lock_type.equals("02")) {
@@ -149,7 +516,7 @@ public class analysis {
 	}
 
 	public static String responseCommands(String rs) {
-		String RS = null;
+		String RS = rs;
 		switch (rs) {
 		case "01":
 			rs = "激活响应";
@@ -169,7 +536,7 @@ public class analysis {
 	}
 
 	public static String execResults(String rs) {
-		String RS = null;
+		String RS = rs;
 		switch (rs) {
 		case "51":
 			rs = "未学习；";
@@ -389,7 +756,7 @@ public class analysis {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		frame = new JFrame();
+		frame = new JFrame("支持解析8F40/8F41/8F51/0F40/0F41/0F51");
 		frame.setBounds(100, 100, 798, 600);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
