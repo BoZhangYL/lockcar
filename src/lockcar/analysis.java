@@ -4,21 +4,21 @@ import java.awt.EventQueue;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import java.awt.BorderLayout;
 import javax.swing.JLabel;
-import java.awt.FlowLayout;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JTextArea;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.JButton;
-import javax.swing.JScrollBar;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import javax.swing.JScrollPane;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 
 public class analysis {
 
@@ -62,7 +62,6 @@ public class analysis {
 		map.put("消息体属性", RMESSAGE.substring(i, i = +i + R8f40[2]));
 		map.put("终端手机号", RMESSAGE.substring(i, i = +i + R8f40[3]));
 		map.put("消息流水号", RMESSAGE.substring(i, i = +i + R8f40[4]));
-
 		map.put("校验码", RMESSAGE.substring(RMESSAGE.length() - 2 - 2, RMESSAGE.length() - 2));
 		String body = RMESSAGE.substring(i, RMESSAGE.length() - 4);
 		// System.out.println(body);
@@ -161,10 +160,191 @@ public class analysis {
 				map.put("执行状态 ", gettExcStatus(EXCStauts));
 
 			}
+		} else if (id.equals("0F37")) {
+			int j = 0;
+			int k = 1;
+			while ((body.length()) - j > 32) {
+				String GPSinfo = body.substring(j, j += 32);
+				String data_no = body.substring(j, j += 2);
+				String F37data = body.substring(j, j += 26);
+				map.put("数据单元" + k++,
+						"\n{\tGPS信息：" + getGPSInfo(GPSinfo) + "\n\t数据单元个数：" + data_no + "\n\t" + getF37Data(F37data));
+			}
+
+		} else if (id.equals("0F38")) {
+			int j = 0;
+			String GPSInfo = body.substring(j, j += 40);
+			String StatisticsInfo =body.substring(j,j+124);
+			map.put("GPS信息", getF38GPSinfo(GPSInfo));
+			map.put("统计信息", getStaticticsInfo(StatisticsInfo));
+
 		} else {
 			map.put("不支持通讯协议报文:", id);
 		}
 		return map;
+	}
+
+	public static String getStaticticsInfo(String rs) {
+		String RS = rs;
+		String xingchengkaisshijian = rs.substring(0, 8);
+		xingchengkaisshijian = TimeStamp2Date(deCode(xingchengkaisshijian)+"");
+
+		String xingchengjieshushijian = rs.substring(8, 16);
+		xingchengjieshushijian = TimeStamp2Date(deCode(xingchengjieshushijian)+"");
+
+		String jiashixunhuanzonglicheng = rs.substring(16, 24);
+		jiashixunhuanzonglicheng = deCode(jiashixunhuanzonglicheng) + "m";
+
+		String kongdanghuaxinglicheng = rs.substring(24, 32);
+		kongdanghuaxinglicheng = deCode(kongdanghuaxinglicheng) + "m";
+
+		String zaidanghuaxinglicheng = rs.substring(32, 40);
+		zaidanghuaxinglicheng = deCode(zaidanghuaxinglicheng) + "m";
+
+		String tingchedaisushijian = rs.substring(40, 48);
+		tingchedaisushijian = deCode(tingchedaisushijian) + "s";
+
+		String zhidongchishu = rs.substring(48, 52);
+		zhidongchishu = deCode(zhidongchishu) + "";
+
+		String zhidongleijilicheng = rs.substring(52, 60);
+		zhidongleijilicheng = deCode(zhidongleijilicheng) + "m";
+
+		String zhidongshichang = rs.substring(60, 68);
+		zhidongshichang = deCode(zhidongshichang) + "s";
+
+		String jijiasuchishu = rs.substring(68, 72);
+		jijiasuchishu = deCode(jijiasuchishu) + "";
+
+		String jijiansuchishu = rs.substring(72, 76);
+		jijiansuchishu = deCode(jijiansuchishu) + "";
+
+		String zhengchegusuanzaihe = rs.substring(76, 84);
+		zhengchegusuanzaihe = deCode(zhengchegusuanzaihe) + "kg";
+
+		String qishiyouhao = rs.substring(84, 92);
+		qishiyouhao = deCode(qishiyouhao) + "L";
+
+		String zhongzhiyouhao = rs.substring(92, 100);
+		zhongzhiyouhao = deCode(zhongzhiyouhao) + "L";
+
+		String xunahnglicheng = rs.substring(100, 108);
+		xunahnglicheng = deCode(xunahnglicheng) + "m";
+
+		String pinjunchesu = rs.substring(108, 116);
+		pinjunchesu = deCode(pinjunchesu) + "s";
+
+		String chaosuxingshichishu = rs.substring(116, 120);
+		chaosuxingshichishu = deCode(chaosuxingshichishu) + "";
+
+		String jizhuanwanchishu = rs.substring(120, 124);
+		jizhuanwanchishu = deCode(jizhuanwanchishu) + "";
+
+		RS = "\n\t行程开始时间：" + xingchengkaisshijian + "\n\t行程结束时间：" + xingchengjieshushijian + "\n\t驾驶循环总里程："
+				+ jiashixunhuanzonglicheng + "\n\t空档滑行里程：" + kongdanghuaxinglicheng + "\n\t在档滑行里程："
+				+ zaidanghuaxinglicheng + "\n\t停车怠速时间：" + tingchedaisushijian + "\n\t制动次数：" + zhidongchishu
+				+ "\n\t制动累计里程：" + zhidongleijilicheng + "\n\t制动时长：" + zhidongshichang + "\n\t急加速次数：" + jijiasuchishu
+				+ "\n\t急减速次数：" + jijiansuchishu + "\n\t整车估算载荷：" + zhengchegusuanzaihe + "\n\t起始油耗：" + qishiyouhao
+				+ "\n\t终止油耗：" + zhongzhiyouhao + "\n\t巡航里程：" + xunahnglicheng + "\n\t平均车速行：" + pinjunchesu
+				+ "\n\t超速行驶次数：" + chaosuxingshichishu + "\n\t急转弯次数：" + jizhuanwanchishu;
+
+		return RS;
+	}
+
+	// Convert Unix timestamp to normal date style
+	public static String TimeStamp2Date(String timestampString) {
+		Long timestamp = Long.parseLong(timestampString) * 1000;
+		String date = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new java.util.Date(timestamp));
+		return date;
+	}
+
+	public static String getF38GPSinfo(String rs) {
+		String RS = rs;
+		String time = rs.substring(0, 12);
+		String Latitude = (Integer.valueOf(deCode(rs.substring(12, 20))) * 0.000001) + "°";
+		String longitude = (Integer.valueOf(deCode(rs.substring(20, 28))) * 0.000001) + "°";
+		String high = deCode(rs.substring(28, 32)) + "m";
+		String orientation = deCode(rs.substring(32, 36)) + "°";
+		String speed = (deCode(rs.substring(36, 40)) / 10) + "km/h";
+
+		RS = "\n\t时间：" + time + "\n\t纬度：" + Latitude + "\n\t经度：" + longitude + "\n\t高度：" + high + "\n\t方向："
+				+ orientation + "\n\t速度：0" + speed;
+		return RS;
+	}
+
+	public static String getF37Data(String rs) {
+		String RS = rs;
+		String fadongjiniuju = rs.substring(0, 2);
+		fadongjiniuju = (deCode(fadongjiniuju) - 125) + "%";
+
+		String zonghechesu = rs.substring(2, 6);
+		zonghechesu = (deCode(zonghechesu) / 256) + "km/h";
+
+		String youmen = rs.substring(6, 8);
+		youmen = (deCode(youmen) * 0.4) + "%";
+
+		String zhidongkaiguan = rs.substring(8, 10);
+		switch (zhidongkaiguan) {
+		case "00":
+			zhidongkaiguan = "制动踏板被松开";
+			break;
+		case "01":
+			zhidongkaiguan = "制动踏板被踩下";
+			break;
+		case "10":
+			zhidongkaiguan = "出错";
+			break;
+		case "11":
+			zhidongkaiguan = "不可";
+			break;
+		}
+
+		String fadongjizhuansu = rs.substring(10, 14);
+		fadongjizhuansu = (deCode(fadongjizhuansu) * 0.125) + "rpm";
+
+		String dangwei = rs.substring(14, 16);
+		dangwei = (deCode(dangwei) - 125) + "";
+
+		String liheqikaiguan = rs.substring(16, 18);
+		switch (liheqikaiguan) {
+		case "00":
+			liheqikaiguan = "离合器踏板被松开";
+			break;
+		case "01":
+			liheqikaiguan = "离合器踏板被踩下";
+			break;
+		case "10":
+			liheqikaiguan = "出错";
+			break;
+		case "11":
+			liheqikaiguan = "不可";
+			break;
+		}
+
+		String fadongjisunshiyouhao = rs.substring(18, 22);
+		fadongjisunshiyouhao = (deCode(fadongjisunshiyouhao) / 512) + "km/L";
+
+		String fadongjiranyouxiaohanlv = rs.substring(22, 26);
+		fadongjiranyouxiaohanlv = (deCode(fadongjiranyouxiaohanlv) * 0.05) + "L/h";
+		RS = "\n\t实时数据：\n\t发动机输出扭矩:" + fadongjiniuju + "\n\t\\t综合车速:" + zonghechesu + "\n\t\\t油门:" + youmen
+				+ "\n\t\\t制动开关:" + zhidongkaiguan + "\n\t\\t发动机转速:" + fadongjizhuansu + "\n\t\\t挡位:" + dangwei
+				+ "\n\t\\t离合器开关:" + liheqikaiguan + "\n\t\\t发动机瞬时油耗:" + fadongjisunshiyouhao + "\n\t\\t发动机燃油消耗率:"
+				+ fadongjiranyouxiaohanlv + "\n}";
+		return RS;
+	}
+
+	public static int deCode(String rs) {
+		return Integer.decode("0x" + rs);
+	}
+
+	public static String getGPSInfo(String rs) {
+		String RS = rs;
+		String time = rs.substring(0, 12);
+		String Latitude = (Integer.valueOf(deCode(rs.substring(12, 20))) * 0.000001) + "°";
+		String longitude = (Integer.valueOf(deCode(rs.substring(20, 28))) * 0.000001) + "°";
+		String high = deCode(rs.substring(28, 32)) + "m";
+		RS = "\n\t时间：" + time + "\n\t纬度：" + Latitude + "\n\t经度：" + longitude + "\n\t高度" + high;
+		return RS;
 	}
 
 	public static String gettExcStatus(String rs) {
@@ -756,7 +936,7 @@ public class analysis {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		frame = new JFrame("支持解析8F40/8F41/8F51/0F40/0F41/0F51");
+		frame = new JFrame("支持解析8F40/8F41/8F51/0F40/0F41/0F51/0F37/0F38");
 		frame.setBounds(100, 100, 798, 600);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
@@ -767,9 +947,11 @@ public class analysis {
 
 		JLabel lblNewLabel = new JLabel("请输入协议内容：");
 
-		InArea = new JTextArea();
-
 		JButton btnNewButton = new JButton("解析");
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
 		btnNewButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -793,32 +975,44 @@ public class analysis {
 			}
 		});
 
-		OutArea = new JTextArea();
-
 		JLabel lblNewLabel_1 = new JLabel("协议内容解析如下：");
+
+		JScrollPane scrollPane = new JScrollPane();
+
+		JScrollPane scrollPane_1 = new JScrollPane();
 		GroupLayout gl_panel_1 = new GroupLayout(panel_1);
-		gl_panel_1.setHorizontalGroup(gl_panel_1.createParallelGroup(Alignment.LEADING).addGroup(gl_panel_1
-				.createSequentialGroup()
-				.addGroup(gl_panel_1.createParallelGroup(Alignment.LEADING).addGroup(gl_panel_1.createSequentialGroup()
-						.addGap(24)
-						.addGroup(gl_panel_1.createParallelGroup(Alignment.LEADING)
-								.addComponent(OutArea, GroupLayout.PREFERRED_SIZE, 675, GroupLayout.PREFERRED_SIZE)
-								.addGroup(gl_panel_1.createSequentialGroup()
-										.addComponent(InArea, GroupLayout.PREFERRED_SIZE, 578,
+		gl_panel_1.setHorizontalGroup(gl_panel_1.createParallelGroup(Alignment.TRAILING).addGroup(gl_panel_1
+				.createSequentialGroup().addContainerGap(54, Short.MAX_VALUE)
+				.addGroup(gl_panel_1.createParallelGroup(Alignment.TRAILING)
+						.addGroup(gl_panel_1.createSequentialGroup()
+								.addGroup(gl_panel_1.createParallelGroup(Alignment.LEADING)
+										.addComponent(scrollPane_1, GroupLayout.PREFERRED_SIZE, 611,
 												GroupLayout.PREFERRED_SIZE)
-										.addGap(18).addComponent(btnNewButton, GroupLayout.PREFERRED_SIZE, 66,
-												GroupLayout.PREFERRED_SIZE))))
-						.addGroup(gl_panel_1.createSequentialGroup().addContainerGap().addComponent(lblNewLabel))
-						.addGroup(gl_panel_1.createSequentialGroup().addContainerGap().addComponent(lblNewLabel_1)))
-				.addContainerGap(50, Short.MAX_VALUE)));
-		gl_panel_1.setVerticalGroup(gl_panel_1.createParallelGroup(Alignment.LEADING)
-				.addGroup(gl_panel_1.createSequentialGroup().addGroup(gl_panel_1.createParallelGroup(Alignment.LEADING)
-						.addGroup(gl_panel_1.createSequentialGroup().addContainerGap().addComponent(lblNewLabel)
-								.addPreferredGap(ComponentPlacement.RELATED)
-								.addComponent(InArea, GroupLayout.PREFERRED_SIZE, 133, GroupLayout.PREFERRED_SIZE))
-						.addGroup(gl_panel_1.createSequentialGroup().addGap(66).addComponent(btnNewButton))).addGap(25)
-						.addComponent(lblNewLabel_1).addGap(18)
-						.addComponent(OutArea, GroupLayout.DEFAULT_SIZE, 271, Short.MAX_VALUE).addContainerGap()));
+										.addComponent(lblNewLabel))
+								.addGap(98))
+						.addGroup(gl_panel_1.createParallelGroup(Alignment.LEADING).addComponent(lblNewLabel_1)
+								.addGroup(gl_panel_1.createParallelGroup(Alignment.TRAILING)
+										.addComponent(btnNewButton, GroupLayout.PREFERRED_SIZE, 66,
+												GroupLayout.PREFERRED_SIZE)
+										.addComponent(scrollPane, GroupLayout.PREFERRED_SIZE, 707,
+												GroupLayout.PREFERRED_SIZE))))));
+		gl_panel_1.setVerticalGroup(gl_panel_1.createParallelGroup(Alignment.LEADING).addGroup(gl_panel_1
+				.createSequentialGroup().addGap(18).addComponent(lblNewLabel)
+				.addPreferredGap(ComponentPlacement.UNRELATED)
+				.addGroup(gl_panel_1.createParallelGroup(Alignment.LEADING, false)
+						.addComponent(btnNewButton, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+						.addComponent(scrollPane_1, GroupLayout.DEFAULT_SIZE, 115, Short.MAX_VALUE))
+				.addPreferredGap(ComponentPlacement.RELATED, 39, Short.MAX_VALUE).addComponent(lblNewLabel_1)
+				.addPreferredGap(ComponentPlacement.RELATED)
+				.addComponent(scrollPane, GroupLayout.PREFERRED_SIZE, 282, GroupLayout.PREFERRED_SIZE)));
+
+		InArea = new JTextArea();
+		scrollPane_1.setViewportView(InArea);
+		InArea.setLineWrap(true);
+
+		OutArea = new JTextArea();
+		OutArea.setLineWrap(true);
+		scrollPane.setViewportView(OutArea);
 		panel_1.setLayout(gl_panel_1);
 	}
 }
