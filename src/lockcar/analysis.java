@@ -206,8 +206,7 @@ public class analysis {
 				String MesLength = body.substring(j, j += 2);
 				String ErrorInfo = "";
 				map.put("故障类型", getF39ErrorType(ErrorType));
-				map.put("故障长度", deCode(MesLength)+"个字节");
-				
+				map.put("故障长度", deCode(MesLength) + "个字节");
 
 			} else if (id.equals("0F3F")) {
 				int j = 0;
@@ -233,6 +232,7 @@ public class analysis {
 		}
 		return map;
 	}
+
 	public static String getF39ErrorType(String rs) {
 		String RS = null;
 		switch (rs) {
@@ -247,21 +247,22 @@ public class analysis {
 		}
 		return RS;
 	}
+
 	public static String getF39ErrorInfo(String ErrorType, String rs) {
 		String RS = null;
-		int j=0;
+		int j = 0;
 		try {
 			if (ErrorType.equals("01")) {
-				String chesu =deCode(rs.substring(j,j+=4))/256 + "km/h";
-				String youmen = deCode(rs.substring(j,j+=2))*0.4 +"%";
-				String zhidongxinhao = getDATAzhidong(rs.substring(j,j+=2));
-				String fadongjizhuansu = deCode(rs.substring(j,j+=4))*0.125 +"PPM";
-				String fadongjiwolunzhengyayali = deCode(rs.substring(j,j+=2))*2 +"kpa";
-				String fadongjijinqiyali = deCode(rs.substring(j,j+=2))*2+"kpa";
-				String fadongjipaiqiwendu = deCode(rs.substring(j,j+4))*0.03125+"℃";
-				String fadongjishuiwen =deCode(rs.substring(j,j+=2))-40 +"℃";
-				String youmenbianhualv = deCode(rs.substring(j,j+=4))+"%/s";
-				
+				String chesu = deCode(rs.substring(j, j += 4)) / 256 + "km/h";
+				String youmen = deCode(rs.substring(j, j += 2)) * 0.4 + "%";
+				String zhidongxinhao = getDATAzhidong(rs.substring(j, j += 2));
+				String fadongjizhuansu = deCode(rs.substring(j, j += 4)) * 0.125 + "PPM";
+				String fadongjiwolunzhengyayali = deCode(rs.substring(j, j += 2)) * 2 + "kpa";
+				String fadongjijinqiyali = deCode(rs.substring(j, j += 2)) * 2 + "kpa";
+				String fadongjipaiqiwendu = deCode(rs.substring(j, j + 4)) * 0.03125 + "℃";
+				String fadongjishuiwen = deCode(rs.substring(j, j += 2)) - 40 + "℃";
+				String youmenbianhualv = deCode(rs.substring(j, j += 4)) + "%/s";
+
 			} else if (ErrorType.equals("02")) {
 				;
 			} else {
@@ -272,6 +273,111 @@ public class analysis {
 		}
 		return RS;
 
+	}
+
+	public static String HexStringToBinary(String hexstring) {// 16进制转2进制
+		char[] tmpary = hexstring.toCharArray();
+
+		String rs = "";
+		for (int i = 0; i < tmpary.length; i++) {
+			System.out.println(tmpary[i]);
+			String r = Integer.toBinaryString(Integer.decode("0x" + tmpary[i])) + "";
+			while (r.length() < 4) {
+				r = "0" + r;
+			}
+			rs += r;
+		}
+		return rs;
+	}
+
+	public static String getodbsupport(String rs) {
+		String RS = "\n\tOBD诊断支持：\n";
+		String Binarys = HexStringToBinary(rs);
+
+		char[] Binary = Binarys.toCharArray();
+		int i = 0;
+		if (Binary[i += 1] == '0') {
+			RS += "\n\t\t不支持催化转化器监控";
+		} else {
+			RS += "\n\t\t支持催化转化器监控";
+		}
+		if (Binary[i += 1] == '0') {
+			RS += "\n\t\t不支持热催化转化器监控";
+		} else {
+			RS += "\n\t\t支持加热催化转化器监控";
+		}
+		if (Binary[i += 1] == '0') {
+			RS += "\n\t\t不支持发系统监控";
+		} else {
+			RS += "\n\t\t支持蒸发系统监控";
+		}
+		if (Binary[i += 1] == '0') {
+			RS += "\n\t\t不支持次空气系统监控";
+		} else {
+			RS += "\n\t\t支持二次空气系统监控";
+		}
+		if (Binary[i += 1] == '0') {
+			RS += "\n\t\t不支持/C 系统致冷剂监控";
+		} else {
+			RS += "\n\t\t支持A/C 系统致冷剂监控";
+		}
+		if (Binary[i += 1] == '0') {
+			RS += "\n\t\t不支持气传感器器监控";
+		} else {
+			RS += "\n\t\t支持排气传感器器监控";
+		}
+		if (Binary[i += 1] == '0') {
+			RS += "\n\t\t不支持气传感器加热器监控";
+		} else {
+			RS += "\n\t\t支持排气传感器加热器监控";
+		}
+		if (Binary[i += 1] == '0') {
+			RS += "\n\t\t不支持GR 系统和 VVT 监控";
+		} else {
+			RS += "\n\t\t支持EGR 系统和 VVT 监控";
+		}
+		if (Binary[i += 1] == '0') {
+			RS += "\n\t\t不支持启动辅助系统监控";
+		} else {
+			RS += "\n\t\t支持冷启动辅助系统监控";
+		}
+		if (Binary[i += 1] == '0') {
+			RS += "\n\t\t不支持压压力控制系统";
+		} else {
+			RS += "\n\t\t支持增压压力控制系统";
+		}
+		if (Binary[i += 1] == '0') {
+			RS += "\n\t\t不支持PF 监 控";
+		} else {
+			RS += "\n\t\t支持DPF 监 控";
+		}
+		if (Binary[i += 1] == '0') {
+			RS += "\n\t\t不支持择性催化还原系统（SCR）或 NOx 吸附器";
+		} else {
+			RS += "\n\t\t支持选择性催化还原系统（SCR）或 NOx 吸附器";
+		}
+		if (Binary[i += 1] == '0') {
+			RS += "\n\t\t不支持化催化器监控";
+		} else {
+			RS += "\n\t\t支持氧化催化器监控";
+		}
+		if (Binary[i += 1] == '0') {
+			RS += "\n\t\t不支持火监控";
+		} else {
+			RS += "\n\t\t支持失火监控";
+		}
+		if (Binary[i += 1] == '0') {
+			RS += "\n\t\t不支持油系统监控";
+		} else {
+			RS += "\n\t\t支持燃油系统监控";
+		}
+		if (Binary[i] == '0') {
+			RS += "\n\t\t不支持综合成分监控";
+		} else {
+			RS += "\n\t\t支持综合成分监控";
+		}
+
+		return RS;
 	}
 
 	public static String convertStringToHex(String str) {
@@ -370,7 +476,7 @@ public class analysis {
 
 					String jiami = rs.substring(j, j += 4);
 					RS = "\n\t第" + i++ + "条数据信息：\n\t信息类型标志：" + MesType + "\n\tOBD终端协议：" + odbxieyi + "\n\t MIL状态："
-							+ MILstatus + "\n\t诊断支持状态：" + zhenduanzhichizhuangtai + "\n\t诊断就绪状态："
+							+ MILstatus + "\n\t诊断支持状态：" + getodbsupport(zhenduanzhichizhuangtai) + "\n\t诊断就绪状态："
 							+ zhenduanjiuxuzhuangtai + "\n\tVIN码：" + vin + "\n\t软件标定识别码：" + ruanjianbiaodingshibiema
 							+ "\n\t标定验证码：" + biaodingyanzhengma + "\n\tIUPR值：" + IUPR + "\n\t故障码总数：" + guzhangzongshu
 							+ "\n\t故障码列表：" + guzhangmaleibiao + "\n\t--------------\n";
@@ -448,8 +554,8 @@ public class analysis {
 				guzhangmaleibiao = rs.substring(j, j += deCode(guzhangzongshu) * 8);
 			}
 			RS = "信息体：\n{" + "\n\t数据采集时间：" + time + "\n\t信息流水号：" + MesNo + "\n\t信息类型标志" + MesType + "\n\tOBD终端协议"
-					+ odbxieyi + "\n\t MIL状态：" + MILstatus + "\n\t诊断支持状态：" + zhenduanzhichizhuangtai + "\n\t诊断就绪状态："
-					+ zhenduanjiuxuzhuangtai + "\n\tVIN码：" + convertHexToString(vin) + "\n\t软件标定识别码："
+					+ odbxieyi + "\n\t MIL状态：" + MILstatus + "\n\t诊断支持状态：" + getodbsupport(zhenduanzhichizhuangtai)
+					+ "\n\t诊断就绪状态：" + zhenduanjiuxuzhuangtai + "\n\tVIN码：" + convertHexToString(vin) + "\n\t软件标定识别码："
 					+ convertHexToString(ruanjianbiaodingshibiema) + "\n\t标定验证码："
 					+ convertHexToString(biaodingyanzhengma) + "\n\tIUPR值：" + IUPR + "\n\t故障码总数：" + guzhangzongshu
 					+ "\n\t故障码列表：" + guzhangmaleibiao;
@@ -550,8 +656,9 @@ public class analysis {
 				+ orientation + "\n\t速度：0" + speed;
 		return RS;
 	}
+
 	public static String getDATAzhidong(String rs) {
-		String RS=rs;
+		String RS = rs;
 		switch (rs) {
 		case "00":
 			RS = "制动踏板被松开";
@@ -568,7 +675,7 @@ public class analysis {
 		}
 		return RS;
 	}
-	
+
 	public static String getDATAlihuo(String rs) {
 		String RS = rs;
 		switch (rs) {
@@ -587,6 +694,7 @@ public class analysis {
 		}
 		return RS;
 	}
+
 	public static String getF37Data(String rs) {
 		String RS = rs;
 		String fadongjiniuju = rs.substring(0, 2);
@@ -606,7 +714,7 @@ public class analysis {
 		dangwei = (deCode(dangwei) - 125) + "";
 
 		String liheqikaiguan = getDATAlihuo(rs.substring(16, 18));
-		
+
 		String fadongjisunshiyouhao = rs.substring(18, 22);
 		fadongjisunshiyouhao = (deCode(fadongjisunshiyouhao) / 512) + "km/L";
 
