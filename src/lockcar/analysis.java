@@ -47,150 +47,429 @@ public class analysis {
 	}
 
 	public static Map<String, String> analyshead(String RMESSAGE) {
-		int[] R8f40 = { 2, 4, 4, 12, 4, 2, 2 };
+		RMESSAGE = RMESSAGE.replaceAll(" ", "");// 去掉空格
 		Map<String, String> map = new HashMap<>();
-		int i = 0;
-		// System.out.println(R8F40);
-
 		RMESSAGE = RMESSAGE.replaceAll("7D02", "7E");
 		// System.out.println(R8F40);
 		RMESSAGE = RMESSAGE.replaceAll("7D01", "7D");
-		// System.out.println(R8F40);
-		map.put("标识位", RMESSAGE.substring(i, i = +i + R8f40[0]));
-		String id = RMESSAGE.substring(i, i = +i + R8f40[1]);
-		map.put("消息 ID", id);
-		map.put("消息体属性", RMESSAGE.substring(i, i = +i + R8f40[2]));
-		map.put("终端手机号", RMESSAGE.substring(i, i = +i + R8f40[3]));
-		map.put("消息流水号", RMESSAGE.substring(i, i = +i + R8f40[4]));
-		map.put("校验码", RMESSAGE.substring(RMESSAGE.length() - 2 - 2, RMESSAGE.length() - 2));
-		String body = RMESSAGE.substring(i, RMESSAGE.length() - 4);
-		// System.out.println(body);
-		if (id.equals("8F40")) {
+		if (RMESSAGE.substring(0, 2).equals("23")) {
 			int j = 0;
-			String lock_type = body.substring(j, j += 2);
-
-			map.put("锁车协议类型", lockTypes(lock_type) + ", " + lock_type);
-			String subcommand = body.substring(j, j += 2);
-			if (subcommand.equals("01") || subcommand.equals("02")) {
-				map.put("子命令", subCommands(subcommand));
-				String stats = body.substring(j, j += 4);
-				if (stats.equals("15F4")) {
-					map.put("锁车功能", "激活");
-				} else if (stats.equals("4F51")) {
-					map.put("锁车功能", "关闭激活");
-				}
-				map.put(" GPSID ", body.substring(j, j += 6));
-				map.put("固定密钥", body.substring(j, j += 6));
-			} else if (subcommand.equals("03") || subcommand.equals("04")) {
-				map.put("子命令", subCommands(subcommand));
-				map.put("限制转速", body.substring(j, j += 4));
-				map.put("  Reserved  ", body.substring(j, j += 6));
-				map.put(" GPSID ", body.substring(j, j += 6));
-				if (j != body.length()) {
-					map.put("锁车参数", body.substring(j, j += 4));
-				}
-			} else if (subcommand.equals("10")) {
-				map.put("子命令", subCommands(subcommand));
-			}
-		} else if (id.equals("0F40")) {
-			int j = 0;
-			map.put("应答流水号 ", body.substring(j, j += 4));
-			String execResult = body.substring(j, j += 2);
-			map.put("执行结果 ", execResults(execResult) + ", " + execResult);
-			String lock_type = body.substring(j, j += 2);
-			map.put("锁车协议类型 ", lockTypes(lock_type) + ", " + lock_type);
-			String responsecommand = body.substring(j, j += 2);
-			map.put("响应命令 ", responseCommands(responsecommand));
-		} else if (id.equals("8F51")) {
-			int j = 0;
-			map.put("Version ", body.substring(j, j += 2));
-			map.put("请求时间", body.substring(j, j += 12));
-			String funs = body.substring(j, j += 2);
-			map.put("功能个数", funs);
-			for (int k = 0; k < Integer.valueOf(funs); k++) {
-				String fun_no = body.substring(j, j += 2);
-				map.put("功能编号" + k + 1, getCarStausFuncationList(fun_no));
-			}
-
-		} else if (id.equals("0F51")) {
-			int j = 0;
-			map.put("Version ", body.substring(j, j += 2));
-			map.put("应答时间", body.substring(j, j += 12));
-			String PackageTag = body.substring(j, j += 2);
-			map.put("包标志 ", getPackageTag(PackageTag));
-			map.put("应答流水号 ", body.substring(j, j += 4));
-			String funs = body.substring(j, j += 2);
-			map.put("功能个数", funs);
-			for (int k = 0; k < Integer.valueOf(funs); k++) {
-				String fun_no = body.substring(j, j += 2);
-				map.put("功能编号" + k + 1, getCarStausFuncationList(fun_no));
-				String fun_length = body.substring(j, j += 2);
-				map.put("功能编号" + k + 1 + "结果长度", fun_length);
-				String fun_content = body.substring(j, j += 2 * Integer.valueOf(fun_length));
-				map.put("功能内容：", getFunConttent(fun_no, fun_content));
-			}
-		} else if (id.equals("8F41")) {
-			int j = 0;
-			map.put("Version ", body.substring(j, j += 2));
-			map.put("请求时间", body.substring(j, j += 12));
-			String funs = body.substring(j, j += 2);
-			map.put("功能个数", funs);
-			for (int k = 0; k < Integer.valueOf(funs); k++) {
-				String fun_no = body.substring(j, j += 2);
-				map.put("功能编号" + k + 1, getcontrolFun(fun_no));
-				String FunCmd = body.substring(j, j += 2);
-				map.put("功能指令 ", getcontrolcmd(fun_no, FunCmd));
-				String FunItems = body.substring(j, j += 2);
-				map.put("功能参数 ", getFunItems(fun_no, FunItems));
-			}
-		} else if (id.equals("0F41")) {
-			int j = 0;
-			map.put("Version ", body.substring(j, j += 2));
-			map.put("应答时间", body.substring(j, j += 12));
-			map.put("应答流水号 ", body.substring(j, j += 4));
-			String funs = body.substring(j, j += 2);
-			map.put("功能个数", funs);
-			for (int k = 0; k < Integer.valueOf(funs); k++) {
-				String fun_no = body.substring(j, j += 2);
-				map.put("功能编号" + k + 1, getcontrolFun(fun_no));
-				String FunCmd = body.substring(j, j += 2);
-				map.put("功能指令 ", getcontrolcmd(fun_no, FunCmd));
-				String EXCStauts = body.substring(j, j += 2);
-				;
-				map.put("执行状态 ", gettExcStatus(EXCStauts));
-
-			}
-		} else if (id.equals("0F37")) {
-			int j = 0;
-			int k = 1;
-			while ((body.length()) - j > 32) {
-				String GPSinfo = body.substring(j, j += 32);
-				String data_no = body.substring(j, j += 2);
-				String F37data = body.substring(j, j += 26);
-				map.put("数据单元" + k++,
-						"\n{\tGPS信息：" + getGPSInfo(GPSinfo) + "\n\t数据单元个数：" + data_no + "\n\t" + getF37Data(F37data));
-			}
-
-		} else if (id.equals("0F38")) {
-			int j = 0;
-			String GPSInfo = body.substring(j, j += 40);
-			String StatisticsInfo =body.substring(j,j+124);
-			map.put("GPS信息", getF38GPSinfo(GPSInfo));
-			map.put("统计信息", getStaticticsInfo(StatisticsInfo));
-
+			RMESSAGE = RMESSAGE.substring(0, RMESSAGE.length() - 2);// 去掉校验码
+			String qishifu = RMESSAGE.substring(j, j += 4);
+			String minglingdanyuan = RMESSAGE.substring(j, j += 2);
+			String vin = convertHexToString(RMESSAGE.substring(j, j += 34));
+			String version = RMESSAGE.substring(j, j += 2);
+			String jiamifangshi = RMESSAGE.substring(j, j += 2);
+			String datalength = RMESSAGE.substring(j, j += 4);
+			String data = RMESSAGE.substring(j, j += 2 * Integer.valueOf(deCode(datalength)));
+			map.put("起始符", qishifu);
+			map.put("命令单元", minglingdanyuan);
+			map.put("VIN码", vin);
+			map.put("软件版本号", version);
+			map.put("数据加密方式", jiamifangshi);
+			map.put("数据单元长度", deCode(datalength) + "");
+			map.put("数据单元内容", getoldData(minglingdanyuan, data));
 		} else {
-			map.put("不支持通讯协议报文:", id);
+			int[] R8f40 = { 2, 4, 4, 12, 4, 2, 2 };
+
+			int i = 0;
+			// System.out.println(R8F40);
+
+			// System.out.println(R8F40);
+			map.put("标识位", RMESSAGE.substring(i, i = +i + R8f40[0]));
+			String id = RMESSAGE.substring(i, i = +i + R8f40[1]);
+			map.put("消息 ID", id);
+			map.put("消息体属性", RMESSAGE.substring(i, i = +i + R8f40[2]));
+			map.put("终端手机号", RMESSAGE.substring(i, i = +i + R8f40[3]));
+			map.put("消息流水号", RMESSAGE.substring(i, i = +i + R8f40[4]));
+			map.put("校验码", RMESSAGE.substring(RMESSAGE.length() - 2 - 2, RMESSAGE.length() - 2));
+			String body = RMESSAGE.substring(i, RMESSAGE.length() - 4);
+			// System.out.println(body);
+			if (id.equals("8F40")) {
+				int j = 0;
+				String lock_type = body.substring(j, j += 2);
+
+				map.put("锁车协议类型", lockTypes(lock_type) + ", " + lock_type);
+				String subcommand = body.substring(j, j += 2);
+				if (subcommand.equals("01") || subcommand.equals("02")) {
+					map.put("子命令", subCommands(subcommand));
+					String stats = body.substring(j, j += 4);
+					if (stats.equals("15F4")) {
+						map.put("锁车功能", "激活");
+					} else if (stats.equals("4F51")) {
+						map.put("锁车功能", "关闭激活");
+					}
+					map.put(" GPSID ", body.substring(j, j += 6));
+					map.put("固定密钥", body.substring(j, j += 6));
+				} else if (subcommand.equals("03") || subcommand.equals("04")) {
+					map.put("子命令", subCommands(subcommand));
+					map.put("限制转速", body.substring(j, j += 4));
+					map.put("  Reserved  ", body.substring(j, j += 6));
+					map.put(" GPSID ", body.substring(j, j += 6));
+					if (j != body.length()) {
+						map.put("锁车参数", body.substring(j, j += 4));
+					}
+				} else if (subcommand.equals("10")) {
+					map.put("子命令", subCommands(subcommand));
+				}
+			} else if (id.equals("0F40")) {
+				int j = 0;
+				map.put("应答流水号 ", body.substring(j, j += 4));
+				String execResult = body.substring(j, j += 2);
+				map.put("执行结果 ", execResults(execResult) + ", " + execResult);
+				String lock_type = body.substring(j, j += 2);
+				map.put("锁车协议类型 ", lockTypes(lock_type) + ", " + lock_type);
+				String responsecommand = body.substring(j, j += 2);
+				map.put("响应命令 ", responseCommands(responsecommand));
+			} else if (id.equals("8F51")) {
+				int j = 0;
+				map.put("Version ", body.substring(j, j += 2));
+				map.put("请求时间", body.substring(j, j += 12));
+				String funs = body.substring(j, j += 2);
+				map.put("功能个数", funs);
+				for (int k = 0; k < Integer.valueOf(funs); k++) {
+					String fun_no = body.substring(j, j += 2);
+					map.put("功能编号" + k + 1, getCarStausFuncationList(fun_no));
+				}
+
+			} else if (id.equals("0F51")) {
+				int j = 0;
+				map.put("Version ", body.substring(j, j += 2));
+				map.put("应答时间", body.substring(j, j += 12));
+				String PackageTag = body.substring(j, j += 2);
+				map.put("包标志 ", getPackageTag(PackageTag));
+				map.put("应答流水号 ", body.substring(j, j += 4));
+				String funs = body.substring(j, j += 2);
+				map.put("功能个数", funs);
+				for (int k = 0; k < Integer.valueOf(funs); k++) {
+					String fun_no = body.substring(j, j += 2);
+					map.put("功能编号" + k + 1, getCarStausFuncationList(fun_no));
+					String fun_length = body.substring(j, j += 2);
+					map.put("功能编号" + k + 1 + "结果长度", fun_length);
+					String fun_content = body.substring(j, j += 2 * Integer.valueOf(fun_length));
+					map.put("功能内容：", getFunConttent(fun_no, fun_content));
+				}
+			} else if (id.equals("8F41")) {
+				int j = 0;
+				map.put("Version ", body.substring(j, j += 2));
+				map.put("请求时间", body.substring(j, j += 12));
+				String funs = body.substring(j, j += 2);
+				map.put("功能个数", funs);
+				for (int k = 0; k < Integer.valueOf(funs); k++) {
+					String fun_no = body.substring(j, j += 2);
+					map.put("功能编号" + k + 1, getcontrolFun(fun_no));
+					String FunCmd = body.substring(j, j += 2);
+					map.put("功能指令 ", getcontrolcmd(fun_no, FunCmd));
+					String FunItems = body.substring(j, j += 2);
+					map.put("功能参数 ", getFunItems(fun_no, FunItems));
+				}
+			} else if (id.equals("0F41")) {
+				int j = 0;
+				map.put("Version ", body.substring(j, j += 2));
+				map.put("应答时间", body.substring(j, j += 12));
+				map.put("应答流水号 ", body.substring(j, j += 4));
+				String funs = body.substring(j, j += 2);
+				map.put("功能个数", funs);
+				for (int k = 0; k < Integer.valueOf(funs); k++) {
+					String fun_no = body.substring(j, j += 2);
+					map.put("功能编号" + k + 1, getcontrolFun(fun_no));
+					String FunCmd = body.substring(j, j += 2);
+					map.put("功能指令 ", getcontrolcmd(fun_no, FunCmd));
+					String EXCStauts = body.substring(j, j += 2);
+					;
+					map.put("执行状态 ", gettExcStatus(EXCStauts));
+
+				}
+			} else if (id.equals("0F37")) {
+				int j = 0;
+				int k = 1;
+				while ((body.length()) - j > 32) {
+					String GPSinfo = body.substring(j, j += 32);
+					String data_no = body.substring(j, j += 2);
+					String F37data = body.substring(j, j += 26);
+					map.put("数据单元" + k++, "\n{\tGPS信息：" + getGPSInfo(GPSinfo) + "\n\t数据单元个数：" + data_no + "\n\t"
+							+ getF37Data(F37data));
+				}
+
+			} else if (id.equals("0F38")) {
+				int j = 0;
+				String GPSInfo = body.substring(j, j += 40);
+				String StatisticsInfo = body.substring(j, j + 124);
+				map.put("GPS信息", getF38GPSinfo(GPSInfo));
+				map.put("统计信息", getStaticticsInfo(StatisticsInfo));
+
+			} else if (id.equals("0F39")) {
+				int j = 0;
+				String GPSInfo = body.substring(j, j += 40);
+				map.put("GPS信息", getF38GPSinfo(GPSInfo));
+				String ErrorType = body.substring(j, j += 2);
+				String MesLength = body.substring(j, j += 2);
+				String ErrorInfo = "";
+				map.put("故障类型", getF39ErrorType(ErrorType));
+				map.put("故障长度", deCode(MesLength)+"个字节");
+				
+
+			} else if (id.equals("0F3F")) {
+				int j = 0;
+				body = body.substring(0, body.length() - 2);// 去掉校验码
+				String qishifu = body.substring(j, j += 4);
+				String minglingdanyuan = body.substring(j, j += 2);
+				String vin = body.substring(j, j += 34);
+				String version = body.substring(j, j += 2);
+				String jiamifangshi = body.substring(j, j += 2);
+				String datalength = body.substring(j, j += 4);
+				String data = body.substring(j, j += 2 * Integer.valueOf(deCode(datalength)));
+				map.put("起始符", qishifu);
+				map.put("命令单元", minglingdanyuan);
+				map.put("VIN码", vin);
+				map.put("软件版本号", version);
+				map.put("数据加密方式", jiamifangshi);
+				map.put("数据单元长度", deCode(datalength) + "");
+				map.put("数据单元内容", getF3FData(data));
+			} else {
+				map.put("不支持通讯协议报文:", id);
+			}
+
 		}
 		return map;
+	}
+	public static String getF39ErrorType(String rs) {
+		String RS = null;
+		switch (rs) {
+		case "01":
+			RS = "产生或新增故障";
+			break;
+		case "02":
+			RS = "取消故障";
+			break;
+		default:
+			break;
+		}
+		return RS;
+	}
+	public static String getF39ErrorInfo(String ErrorType, String rs) {
+		String RS = null;
+		int j=0;
+		try {
+			if (ErrorType.equals("01")) {
+				String chesu =deCode(rs.substring(j,j+=4))/256 + "km/h";
+				String youmen = deCode(rs.substring(j,j+=2))*0.4 +"%";
+				String zhidongxinhao = getDATAzhidong(rs.substring(j,j+=2));
+				String fadongjizhuansu = deCode(rs.substring(j,j+=4))*0.125 +"PPM";
+				String fadongjiwolunzhengyayali = deCode(rs.substring(j,j+=2))*2 +"kpa";
+				String fadongjijinqiyali = deCode(rs.substring(j,j+=2))*2+"kpa";
+				String fadongjipaiqiwendu = deCode(rs.substring(j,j+4))*0.03125+"℃";
+				String fadongjishuiwen =deCode(rs.substring(j,j+=2))-40 +"℃";
+				String youmenbianhualv = deCode(rs.substring(j,j+=4))+"%/s";
+				
+			} else if (ErrorType.equals("02")) {
+				;
+			} else {
+				RS = "不支持的故障类型！";
+			}
+		} catch (Exception e) {
+			RS = "解析出错！";
+		}
+		return RS;
+
+	}
+
+	public static String convertStringToHex(String str) {
+
+		char[] chars = str.toCharArray();
+
+		StringBuffer hex = new StringBuffer();
+		for (int i = 0; i < chars.length; i++) {
+			hex.append(Integer.toHexString((int) chars[i]));
+		}
+
+		return hex.toString();
+	}
+
+	public static String convertHexToString(String hex) {
+
+		StringBuilder sb = new StringBuilder();
+		StringBuilder temp = new StringBuilder();
+
+		// 49204c6f7665204a617661 split into two characters 49, 20, 4c...
+		for (int i = 0; i < hex.length() - 1; i += 2) {
+
+			// grab the hex in pairs
+			String output = hex.substring(i, (i + 2));
+			// convert hex to decimal
+			int decimal = Integer.parseInt(output, 16);
+			// convert the decimal to character
+			sb.append((char) decimal);
+
+			temp.append(decimal);
+		}
+		return sb.toString();
+	}
+
+	public static String getoldData(String cmddata, String rs) {
+		String RS = rs;
+		int j = 0;
+		if (cmddata.equals("01")) {
+			String time = rs.substring(j, j += 12);
+			String dengluliushuihao = rs.substring(j, j += 4);
+			String sim = rs.substring(j, rs.length());
+			time = "20" + deCode(time.substring(0, 2)) + "-" + deCode(time.substring(2, 4)) + "-"
+					+ deCode(time.substring(4, 6)) + " " + deCode(time.substring(6, 8)) + ":"
+					+ deCode(time.substring(8, 10)) + ":" + deCode(time.substring(10, 12)) + ":";
+			dengluliushuihao = deCode(dengluliushuihao) + "";
+			RS = "车辆登入：\n{\n\t数据采集时间：" + time + "\n\t登录流水号：" + dengluliushuihao + "\n\tSIM卡ICCID号："
+					+ convertHexToString(sim) + "\n}";
+		} else if (cmddata.equals("02") || cmddata.equals("03")) {
+
+			String time = rs.substring(j, j += 12);
+			String dengluliushuihao = rs.substring(j, j += 4);
+			String MesBody = rs.substring(j, rs.length());
+			time = "20" + deCode(time.substring(0, 2)) + "-" + deCode(time.substring(2, 4)) + "-"
+					+ deCode(time.substring(4, 6)) + " " + deCode(time.substring(6, 8)) + ":"
+					+ deCode(time.substring(8, 10)) + ":" + deCode(time.substring(10, 12)) + ":";
+			dengluliushuihao = deCode(dengluliushuihao) + "";
+			MesBody = getoldguoliudataBody(MesBody);
+			if (cmddata.equals("03")) {
+				RS = "实时数据上传：\n{\n\t数据采集时间：" + time + "\n\t信息流水号：" + dengluliushuihao + "\n\t信息体：" + MesBody
+						+ "\n--------补发数据----------";
+			} else {
+				RS = "实时数据上传：\n{\n\t数据采集时间：" + time + "\n\t信息流水号：" + dengluliushuihao + "\n\t信息体：" + MesBody;
+			}
+		} else if (cmddata.equals("04")) {
+			String time = rs.substring(j, j += 12);
+			String dengluliushuihao = rs.substring(j, j += 4);
+			time = "20" + deCode(time.substring(0, 2)) + "-" + deCode(time.substring(2, 4)) + "-"
+					+ deCode(time.substring(4, 6)) + " " + deCode(time.substring(6, 8)) + ":"
+					+ deCode(time.substring(8, 10)) + ":" + deCode(time.substring(10, 12)) + ":";
+			dengluliushuihao = deCode(dengluliushuihao) + "";
+			RS = "车辆登出：\n{\n\t数据采集时间：" + time + "\n\t登录流水号：" + dengluliushuihao;
+		}
+		return RS;
+	}
+
+	public static String getoldguoliudataBody(String rs) {
+		System.out.println(rs);
+		String RS = rs;
+		int j = 0;
+		int i = 1;
+		do {
+			String MesType = rs.substring(j, j += 2);
+			if (MesType.equals("01")) {
+				try {
+					String odbxieyi = rs.substring(j, j += 2);
+					String MILstatus = rs.substring(j, j += 2);
+					String zhenduanzhichizhuangtai = rs.substring(j, j += 4);
+					String zhenduanjiuxuzhuangtai = rs.substring(j, j += 4);
+					String vin = convertHexToString(rs.substring(j, j += 34));
+					String ruanjianbiaodingshibiema = convertHexToString(rs.substring(j, j += 36));
+					String biaodingyanzhengma = convertHexToString(rs.substring(j, j += 36));
+					String IUPR = rs.substring(j, j += 72);
+					String guzhangzongshu = rs.substring(j, j += 2);
+					String guzhangmaleibiao = "";
+					guzhangmaleibiao += "\n\t\t" + rs.substring(j, j += deCode(guzhangzongshu) * 8);
+
+					String jiami = rs.substring(j, j += 4);
+					RS = "\n\t第" + i++ + "条数据信息：\n\t信息类型标志：" + MesType + "\n\tOBD终端协议：" + odbxieyi + "\n\t MIL状态："
+							+ MILstatus + "\n\t诊断支持状态：" + zhenduanzhichizhuangtai + "\n\t诊断就绪状态："
+							+ zhenduanjiuxuzhuangtai + "\n\tVIN码：" + vin + "\n\t软件标定识别码：" + ruanjianbiaodingshibiema
+							+ "\n\t标定验证码：" + biaodingyanzhengma + "\n\tIUPR值：" + IUPR + "\n\t故障码总数：" + guzhangzongshu
+							+ "\n\t故障码列表：" + guzhangmaleibiao + "\n\t--------------\n";
+				} catch (Exception StringIndexOutOfBoundsException) {
+					RS = "解析失败，报文长度不正确！";
+				}
+
+			} else if (MesType.equals("02")) {
+				try {
+					String chesu = rs.substring(j, j += 4);
+					chesu = deCode(chesu) / 256 + "km/h";
+					String daqiyali = rs.substring(j, j += 2);
+					daqiyali = deCode(daqiyali) * 0.5 + "kPa";
+					String fadongjijinshuchuniuju = rs.substring(j, j += 2);
+					fadongjijinshuchuniuju = deCode(fadongjijinshuchuniuju) - 125 + "%";
+					String mochaniuju = deCode(rs.substring(j, j += 2)) - 125 + "%";
+					String fadongjizhuansu = deCode(rs.substring(j, j += 4)) * 0.125 + "rpm";
+					String fadongjiranliaoliuliang = deCode(rs.substring(j, j += 4)) * 0.05 + "L/h";
+					String SCRshangyou = deCode(rs.substring(j, j += 4)) * 0.05 - 200 + "ppm";
+					String SCRxiayou = deCode(rs.substring(j, j += 4)) * 0.05 - 200 + "ppm";
+					String fanyinjiyuliang = deCode(rs.substring(j, j += 2)) * 0.4 + "%";
+					String jinqiliang = deCode(rs.substring(j, j += 4)) * 0.05 + "kg/h";
+					String SCRrukouwendu = deCode(rs.substring(j, j += 4)) * 0.03125 - 273 + "℃";
+					String SCRchukouwendu = deCode(rs.substring(j, j += 4)) * 0.03125 - 273 + "℃";
+					String DPFyacha = deCode(rs.substring(j, j += 4)) * 0.1 + "kPa";
+					String fadongjilengqueye = deCode(rs.substring(j, j += 2)) - 40 + "℃";
+					String youxiangyewei = deCode(rs.substring(j, j += 2)) * 0.4 + "%";
+					String dengweizhaungtai = deCode(rs.substring(j, j += 2)) + "";
+					String jingdu = deCode(rs.substring(j, j += 8)) * 0.000001 + "°";
+					String weidu = deCode(rs.substring(j, j += 8)) * 0.000001 + "°";
+					String leijilicheng = deCodeLong(rs.substring(j, j += 8)) * 0.1 + "km";
+					String jiami = rs.substring(j, j += 4);
+					RS += "\n\t第" + i++ + "条数据信息：\n\t车速：" + chesu + "\n\t大气压力：" + daqiyali + "\n\t发动机净输出扭矩："
+							+ fadongjijinshuchuniuju + "\n\t摩擦扭矩：" + mochaniuju + "\n\t发动机转速：" + fadongjizhuansu
+							+ "\n\t发动机燃料流量：" + fadongjiranliaoliuliang + "\n\tSCR上游NOX传感器输出值：" + SCRshangyou
+							+ "\n\tSCR下游NOX传感器输出值：" + SCRxiayou + "\n\t反应剂余量：" + fanyinjiyuliang + "\n\t进气量："
+							+ jinqiliang + "\n\tSCR入口温度：" + SCRrukouwendu + "\n\tSCR出口温度：" + SCRchukouwendu
+							+ "\n\t发动机冷却液温度：" + fadongjilengqueye + "\n\t油箱液位：" + youxiangyewei + "\n\tDPF压差："
+							+ DPFyacha + "\n\t定位状态：" + dengweizhaungtai + "\n\t经度：" + jingdu + "\n\t纬度：" + weidu
+							+ "\n\t累计里程：" + leijilicheng + "\n\t--------------\n";
+				} catch (Exception e) {
+					RS = "解析失败，请确认解析协议和工具是否出错！";
+				}
+
+			} else {
+				RS = "不支持的数据信息！" + MesType;
+				j += 10000;
+			}
+		} while (j < rs.length() - 1);
+		return RS;
+	}
+
+	public static Long deCodeLong(String rs) {
+		return Long.decode("0X" + rs);
+	}
+
+	public static String getF3FData(String rs) {
+		String RS = rs;
+		int j = 0;
+		String time = rs.substring(j, j += 12);
+		String MesType = rs.substring(j, j += 2);
+		String MesNo = rs.substring(j, j += 4);
+		if (MesType.equals("01")) {
+			String odbxieyi = rs.substring(j, j += 2);
+			String MILstatus = rs.substring(j, j += 2);
+			String zhenduanzhichizhuangtai = rs.substring(j, j += 4);
+			String zhenduanjiuxuzhuangtai = rs.substring(j, j += 4);
+			String vin = rs.substring(j, j += 34);
+			String ruanjianbiaodingshibiema = rs.substring(j, j += 36);
+			String biaodingyanzhengma = rs.substring(j, j += 36);
+			String IUPR = rs.substring(j, j += 72);
+			String guzhangzongshu = rs.substring(j, j += 2);
+			String guzhangmaleibiao = "";
+			if (deCode(guzhangzongshu) > 0) {
+				guzhangmaleibiao = rs.substring(j, j += deCode(guzhangzongshu) * 8);
+			}
+			RS = "信息体：\n{" + "\n\t数据采集时间：" + time + "\n\t信息流水号：" + MesNo + "\n\t信息类型标志" + MesType + "\n\tOBD终端协议"
+					+ odbxieyi + "\n\t MIL状态：" + MILstatus + "\n\t诊断支持状态：" + zhenduanzhichizhuangtai + "\n\t诊断就绪状态："
+					+ zhenduanjiuxuzhuangtai + "\n\tVIN码：" + convertHexToString(vin) + "\n\t软件标定识别码："
+					+ convertHexToString(ruanjianbiaodingshibiema) + "\n\t标定验证码："
+					+ convertHexToString(biaodingyanzhengma) + "\n\tIUPR值：" + IUPR + "\n\t故障码总数：" + guzhangzongshu
+					+ "\n\t故障码列表：" + guzhangmaleibiao;
+		}
+
+		return RS;
+	}
+
+	public static String getErrorInfo(String errortype, String messlength, String rs) {
+		String RS = rs;
+		return RS;
 	}
 
 	public static String getStaticticsInfo(String rs) {
 		String RS = rs;
 		String xingchengkaisshijian = rs.substring(0, 8);
-		xingchengkaisshijian = TimeStamp2Date(deCode(xingchengkaisshijian)+"");
+		xingchengkaisshijian = TimeStamp2Date(deCode(xingchengkaisshijian) + "");
 
 		String xingchengjieshushijian = rs.substring(8, 16);
-		xingchengjieshushijian = TimeStamp2Date(deCode(xingchengjieshushijian)+"");
+		xingchengjieshushijian = TimeStamp2Date(deCode(xingchengjieshushijian) + "");
 
 		String jiashixunhuanzonglicheng = rs.substring(16, 24);
 		jiashixunhuanzonglicheng = deCode(jiashixunhuanzonglicheng) + "m";
@@ -271,7 +550,43 @@ public class analysis {
 				+ orientation + "\n\t速度：0" + speed;
 		return RS;
 	}
-
+	public static String getDATAzhidong(String rs) {
+		String RS=rs;
+		switch (rs) {
+		case "00":
+			RS = "制动踏板被松开";
+			break;
+		case "01":
+			RS = "制动踏板被踩下";
+			break;
+		case "10":
+			RS = "出错";
+			break;
+		case "11":
+			RS = "不可用";
+			break;
+		}
+		return RS;
+	}
+	
+	public static String getDATAlihuo(String rs) {
+		String RS = rs;
+		switch (rs) {
+		case "00":
+			RS = "离合器踏板被松开";
+			break;
+		case "01":
+			RS = "离合器踏板被踩下";
+			break;
+		case "10":
+			RS = "出错";
+			break;
+		case "11":
+			RS = "不可";
+			break;
+		}
+		return RS;
+	}
 	public static String getF37Data(String rs) {
 		String RS = rs;
 		String fadongjiniuju = rs.substring(0, 2);
@@ -283,53 +598,24 @@ public class analysis {
 		String youmen = rs.substring(6, 8);
 		youmen = (deCode(youmen) * 0.4) + "%";
 
-		String zhidongkaiguan = rs.substring(8, 10);
-		switch (zhidongkaiguan) {
-		case "00":
-			zhidongkaiguan = "制动踏板被松开";
-			break;
-		case "01":
-			zhidongkaiguan = "制动踏板被踩下";
-			break;
-		case "10":
-			zhidongkaiguan = "出错";
-			break;
-		case "11":
-			zhidongkaiguan = "不可";
-			break;
-		}
-
+		String zhidongkaiguan = getDATAzhidong(rs.substring(8, 10));
 		String fadongjizhuansu = rs.substring(10, 14);
 		fadongjizhuansu = (deCode(fadongjizhuansu) * 0.125) + "rpm";
 
 		String dangwei = rs.substring(14, 16);
 		dangwei = (deCode(dangwei) - 125) + "";
 
-		String liheqikaiguan = rs.substring(16, 18);
-		switch (liheqikaiguan) {
-		case "00":
-			liheqikaiguan = "离合器踏板被松开";
-			break;
-		case "01":
-			liheqikaiguan = "离合器踏板被踩下";
-			break;
-		case "10":
-			liheqikaiguan = "出错";
-			break;
-		case "11":
-			liheqikaiguan = "不可";
-			break;
-		}
-
+		String liheqikaiguan = getDATAlihuo(rs.substring(16, 18));
+		
 		String fadongjisunshiyouhao = rs.substring(18, 22);
 		fadongjisunshiyouhao = (deCode(fadongjisunshiyouhao) / 512) + "km/L";
 
 		String fadongjiranyouxiaohanlv = rs.substring(22, 26);
 		fadongjiranyouxiaohanlv = (deCode(fadongjiranyouxiaohanlv) * 0.05) + "L/h";
-		RS = "\n\t实时数据：\n\t发动机输出扭矩:" + fadongjiniuju + "\n\t\\t综合车速:" + zonghechesu + "\n\t\\t油门:" + youmen
-				+ "\n\t\\t制动开关:" + zhidongkaiguan + "\n\t\\t发动机转速:" + fadongjizhuansu + "\n\t\\t挡位:" + dangwei
-				+ "\n\t\\t离合器开关:" + liheqikaiguan + "\n\t\\t发动机瞬时油耗:" + fadongjisunshiyouhao + "\n\t\\t发动机燃油消耗率:"
-				+ fadongjiranyouxiaohanlv + "\n}";
+		RS = "\n\t实时数据：\n\t发动机输出扭矩:" + fadongjiniuju + "\n\t综合车速:" + zonghechesu + "\n\t油门:" + youmen + "\n\t制动开关:"
+				+ zhidongkaiguan + "\n\t发动机转速:" + fadongjizhuansu + "\n\t\\t挡位:" + dangwei + "\n\t离合器开关:"
+				+ liheqikaiguan + "\n\t发动机瞬时油耗:" + fadongjisunshiyouhao + "\n\t发动机燃油消耗率:" + fadongjiranyouxiaohanlv
+				+ "\n}";
 		return RS;
 	}
 
@@ -936,7 +1222,7 @@ public class analysis {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		frame = new JFrame("支持解析8F40/8F41/8F51/0F40/0F41/0F51/0F37/0F38");
+		frame = new JFrame("支持解析8F40/8F41/8F51/0F40/0F41/0F51/0F37/0F38/2323/0F3F");
 		frame.setBounds(100, 100, 798, 600);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
